@@ -1,2 +1,4 @@
 backend/openapi.documented.yml
 backend/.venv
+*.db
+__pycache__/
