@@ -1,0 +1,91 @@
+openapi: '3.0.3'
+info:
+  title: FastAutofill Backend
+  version: '1.0'
+servers:
+  - url: https://api.server.test/v1
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+    ApiKeyAuth:
+      description: API key for use by system adminstrators
+      type: apiKey
+      name: api-key
+      in: header
+security:
+  - BearerAuth: []
+tags:
+  - name: Application
+    description: Records of job applications that users have submitted
+  - name: Responses
+    description: Describes a from response that user has used before.
+paths:
+  /auth/login:
+    post:
+      description: 'Logins a user and returns a session token'
+      parameters: []
+      security: []
+      responses:
+        '200':
+          description: OK
+  
+  /auth/register:
+    post:
+      description: 'Creates an account'
+      parameters: []
+      security: []
+      responses:
+        '201':
+          description: Created new user successfully
+        '403':
+          description: User already exists
+  
+  /user/profile:
+    get:
+      description: 'Get the profile information'
+      parameters: []
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+
+  /application/create:
+    post:
+      description: 'Creates a record of an application'
+      parameters: []
+      responses:
+        '200':
+          description: OK  
+
+  /responses/{id}:
+    get:
+      description: 'View the response with a specific ID'
+      parameters: []
+      responses:
+        '200':
+          description: OK  
+
+  /application/{id}:
+    get:
+      description: 'View the application with a specific ID'
+      parameters: []
+      responses:
+        '200':
+          description: OK
+    delete:
+      description: 'Delete the application with an ID'
+      parameters: []
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK
+
+
+    
