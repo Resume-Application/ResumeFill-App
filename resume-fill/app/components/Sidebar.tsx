@@ -7,12 +7,16 @@ interface SidebarProps {
 
 export default function Sidebar({ className = "" }: SidebarProps) {
   return (
-    <aside className={`h-screen w-64 border-r border-gray-200 bg-white p-6 flex flex-col ${className}`}>
-      <h2 className="text-xl font-bold font-mono tracking-tight mb-8 text-black">
+    <aside
+      className={`flex flex-col w-64 border-r border-gray-200 bg-white p-6 ${className}`}
+    >
+      {/* Logo / Title - stays fixed */}
+      <h2 className="text-xl font-bold font-mono tracking-tight mb-8 text-black flex-shrink-0">
         Resume Fill
       </h2>
 
-      <nav className="flex flex-col gap-1">
+      {/* Scrollable area: nav */}
+      <nav className="flex-1 flex flex-col gap-1 overflow-auto">
         <SidebarItem label="Home" href="/dashboard" icon={<Home />} />
         <SidebarItem
           label="Job Recs"
@@ -23,8 +27,8 @@ export default function Sidebar({ className = "" }: SidebarProps) {
         <SidebarItem label="Settings" href="/settings" icon={<Settings />} />
       </nav>
 
-      {/* Footer */}
-      <div className="mt-auto border-t border-gray-200 pt-6 flex flex-col gap-3">
+      {/* Footer - pinned */}
+      <div className="mt-auto border-t border-gray-200 pt-6 flex flex-col gap-3 flex-shrink-0">
         <SidebarItem label="Account" href="/profile" icon={<User />} />
       </div>
     </aside>
