@@ -6,7 +6,7 @@ import PreferencesSettings from "../components/settings/PreferencesSettings";
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-gray-50 text-black px-10 py-10">
+    <div className="min-h-screen bg-stone-100 text-black px-10 py-10">
       <div className="max-w-5xl mx-auto space-y-10">
         <h1 className="text-4xl font-bold">Settings</h1>
 

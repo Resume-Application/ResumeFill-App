@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <header className="w-full bg-white border-b border-gray-200 shadow-sm px-6 py-4 flex justify-between items-center flex-shrink-0">
+    <header className="w-full bg-stone-100 px-6 py-4 flex justify-between items-center flex-shrink-0 shadow-sm border-b border-gray-200">
       {/* Left: App Title */}
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold tracking-tight text-black">Resume Fill</h1>
@@ -22,7 +22,10 @@ export default function Navbar() {
         </button>
 
         {/* Profile */}
-        <Link href="/profile" className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition">
+        <Link
+          href="/profile"
+          className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition"
+        >
           <User className="text-gray-600" />
           <span className="text-gray-800 font-medium">Archit</span>
         </Link>

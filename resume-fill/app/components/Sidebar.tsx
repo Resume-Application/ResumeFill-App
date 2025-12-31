@@ -20,7 +20,7 @@ export default function Sidebar({ className = "" }: SidebarProps) {
         <SidebarItem label="Home" href="/dashboard" icon={<Home />} />
         <SidebarItem
           label="Job Recs"
-          href="/dashboard/applications"
+          href="/job-recommendations"
           notificationCount={3}
           icon={<BookOpenCheck />}
         />

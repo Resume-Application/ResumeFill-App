@@ -9,14 +9,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   // Routes that show sidebar/navbar
-  const dashboardRoutes = ["/", "/intro", "/dashboard", "/profile", "/settings"];
+  const dashboardRoutes = ["/", "/intro", "/dashboard", "/profile", "/settings", "/job-recommendations"];
   const showSidebar = dashboardRoutes.some(
     route => pathname === route || pathname.startsWith(route + "/")
   );
 
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-black">
+      <body className="bg-stone-100 text-black">
         <div className="flex h-screen">
           {/* Sidebar */}
           {showSidebar && <Sidebar />}
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {showSidebar && <Navbar />}
 
             {/* Main scrollable area */}
-            <main className="flex-1 overflow-auto p-6">
+            <main className="flex-1 overflow-auto">
               {children}
             </main>
           </div>
