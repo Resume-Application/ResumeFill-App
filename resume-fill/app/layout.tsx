@@ -8,7 +8,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   // Routes that should show sidebar and topbar
-  const sidebarRoutes = ["/", "/intro", "/dashboard", "/profile"];
+  const sidebarRoutes = ["/", "/intro", "/dashboard", "/profile", "/settings"];
   const showSidebar = sidebarRoutes.some(
     route => pathname === route || pathname.startsWith(route + "/")
   );

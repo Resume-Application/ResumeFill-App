@@ -20,7 +20,7 @@ export default function Sidebar({ className = "" }: SidebarProps) {
           notificationCount={3}
           icon={<BookOpenCheck />}
         />
-        <SidebarItem label="Settings" href="/dashboard/settings" icon={<Settings />} />
+        <SidebarItem label="Settings" href="/settings" icon={<Settings />} />
       </nav>
 
       {/* Footer */}
