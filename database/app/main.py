@@ -9,7 +9,7 @@ async def lifespan(app: FastAPI):
     init_db()
     yield
 
-from app.middleware.auth import AuthMiddleware
+#from app.middleware.auth import AuthMiddleware
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

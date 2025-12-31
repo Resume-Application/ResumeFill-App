@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
-from app.main import app, get_session
+from app.main import app
+from app.core.db import get_session
 from sqlmodel.pool import StaticPool  
 import pytest
 
@@ -31,7 +32,7 @@ def test_register_user_success(client : TestClient):
     )
     data = response.json()
     assert response.status_code==200
-    assert data["name"] == "Deadpool"
+    assert data["username"] == "Deadpool"
     assert data["disabled"] == False
 
 def test_register_duplicate_username(client : TestClient):
@@ -45,8 +46,6 @@ def test_register_duplicate_username(client : TestClient):
     response1 = client.post("/auth/register", json=payload)
     data = response1.json()
     assert response1.status_code==200
-    assert data["name"] == "Deadpool"
-    assert data["disabled"] == False
 
     dup_payload = payload.copy()
     dup_payload["email"] = "other_email@example.com" 
@@ -64,16 +63,77 @@ def test_register_duplicate_email(client : TestClient):
     response1 = client.post("/auth/register", json=payload)
     data = response1.json()
     assert response1.status_code==200
-    assert data["name"] == "Deadpool"
-    assert data["disabled"] == False
 
     dup_payload = payload.copy()
     dup_payload["username"] = "Gwenpool" 
     response2 = client.post("/auth/register", json=dup_payload)
     assert response2.status_code == 400
+def test_login_success(client: TestClient):
+    # Register user
+    register_response = client.post(
+        "/auth/register",
+        json={
+            "username": "Deadpool",
+            "full_name": "Dive Wilson",
+            "password": "DeadpoolsPassword",
+            "email": "deadpool@gmail.com"
+        }
+    )
+    assert register_response.status_code == 200
 
-#def test_login_success(client):
-    
-#def test_login_wrong_password(client):
-    
-#def test_login_non_existent_user(client):
+    # Login with correct credentials
+    login_response = client.post(
+        "/auth/login",
+        data={
+            "username": "Deadpool",
+            "password": "DeadpoolsPassword"
+        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+
+    assert login_response.status_code == 200
+    body = login_response.json()
+
+    assert "access_token" in body
+    assert "token_type" in body
+    assert body["token_type"].lower() == "bearer"
+
+
+def test_login_wrong_password(client: TestClient):
+    # Ensure user exists
+    client.post(
+        "/auth/register",
+        json={
+            "username": "Deadpool2",
+            "full_name": "Wade Wilson",
+            "password": "CorrectPassword",
+            "email": "deadpool2@gmail.com"
+        }
+    )
+
+    # Attempt login with wrong password
+    response = client.post(
+        "/auth/login",
+        data={
+            "username": "Deadpool2",
+            "password": "WrongPassword"
+        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Incorrect username or password"
+
+
+def test_login_non_existent_user(client: TestClient):
+    response = client.post(
+        "/auth/login",
+        data={
+            "username": "NonExistentUser",
+            "password": "DoesNotMatter"
+        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Incorrect username or password"
