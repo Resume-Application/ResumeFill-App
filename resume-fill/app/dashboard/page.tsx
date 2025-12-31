@@ -1,8 +1,8 @@
 "use client";
-import ApplicationTracker from "../components/ApplicationTracker";
-import DailyGoals from "../components/DailyGoals";
-import Recommendations from "../components/Recommendations";
-import JobMatches from "../components/JobMatches";
+import ApplicationTracker from "../components/dashboard/ApplicationTracker";
+import DailyGoals from "../components/dashboard/DailyGoals";
+import Recommendations from "../components/dashboard/Recommendations";
+import JobMatches from "../components/dashboard/JobMatches";
 
 export default function Dashboard() {
   return (

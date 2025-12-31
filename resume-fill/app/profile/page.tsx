@@ -5,7 +5,7 @@ import ProfileStats from "../components/profile/ProfileStats";
 
 export default function Profile() {
   return (
-    <div className="min-h-screen bg-gray-50 text-black px-10 py-10">
+    <div className="min-h-screen bg-stone-100 text-black px-10 py-10">
       <div className="max-w-5xl mx-auto space-y-10">
         <h1 className="text-4xl font-bold">My Profile</h1>
 
