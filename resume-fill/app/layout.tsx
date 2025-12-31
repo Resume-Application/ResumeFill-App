@@ -8,7 +8,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   // Routes that should show sidebar and topbar
-  const sidebarRoutes = ["/", "/intro", "/dashboard"];
+  const sidebarRoutes = ["/", "/intro", "/dashboard", "/profile"];
   const showSidebar = sidebarRoutes.some(
     route => pathname === route || pathname.startsWith(route + "/")
   );
@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex min-h-screen">
           {/* Sidebar */}
           {showSidebar && <Sidebar />}
-
+          
 
             <div className="flex-1 flex flex-col">
 
