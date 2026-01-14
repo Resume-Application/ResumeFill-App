@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Request
-from app.models import UserPublic
+from fastapi import APIRouter, Depends
+from app.models.user_models import UserPublic, User
+from app.dependencies.auth_dependencies import get_current_user
 
 router = APIRouter()
 
 @router.get("/user/profile", response_model=UserPublic)
-def read_users_me(request: Request):
-    return request.state.user
+def get_current_user(current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return current_user

@@ -98,7 +98,6 @@ def test_login_success(client: TestClient):
     assert "token_type" in body
     assert body["token_type"].lower() == "bearer"
 
-
 def test_login_wrong_password(client: TestClient):
     # Ensure user exists
     client.post(

@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any, Union
 from fastapi import Depends, HTTPException, status
-from joserfc import jwt, jwk 
+from joserfc import jwt, jwk
+from joserfc.jwt import Token
 from joserfc.errors import BadSignatureError, InvalidPayloadError, ClaimError
 from pydantic import BaseModel
 from app.core.config import settings
+from app.models.jwt_models import JWTTokenClaims
 from pwdlib import PasswordHash
 
 import logging
@@ -22,7 +24,7 @@ class TokenResponse(BaseModel):
     token_type: str
 
 
-def create_access_token(user_id:str, expires_delta: timedelta | None = None) -> TokenResponse:
+def create_access_token(user_id: int, expires_delta: timedelta | None = None) -> TokenResponse:
     '''
     Docstring for create_access_token
     :param data: Description
@@ -39,11 +41,11 @@ def create_access_token(user_id:str, expires_delta: timedelta | None = None) -> 
     header = {
         "alg": settings.JWT_ALGORITHM,
         "typ": "JWT"}
-    claim = {
-        "user": user_id,
-        "exp": expire,
-        "iss": settings.PROJECT_URL
-    }
+    claim = JWTTokenClaims(
+        user_id=user_id,
+        exp=int(expire.timestamp()),
+        iss=settings.PROJECT_URL
+    ).model_dump()
     encoded = jwt.encode(header, claim, _key)
 
     token = TokenResponse(
@@ -52,19 +54,26 @@ def create_access_token(user_id:str, expires_delta: timedelta | None = None) -> 
     )
     return token
 
-async def decode_access_token(tokenResponse: TokenResponse) -> str | None:
+def decode_access_token(access_token: str) -> JWTTokenClaims | None:
     '''
-    Returns the user id for a payload token or none if not valid. It is invalid if the timedate expired
+    Decodes the access token as a jwt object.
     
-    :param token: Description
+    :param token: User string
     :type token: str
-    :return: Description
-    :rtype: dict
+    :return: JWT of the object.
+    :rtype: Joserfc.jwt.Token
     '''
-    encrypted = tokenResponse.access_token
+
+    if not isinstance(access_token, str):
+        raise TypeError(
+            f"access_token must be str, got {type(access_token).__name__}"
+        )
+
+
+    
     user = None
     try:
-        token = jwt.decode(encrypted, _key)
+        token = jwt.decode(access_token, _key)
     except BadSignatureError:
         logging.info("Bad signature")
         return None
@@ -81,8 +90,8 @@ async def decode_access_token(tokenResponse: TokenResponse) -> str | None:
         logging.info(f"Claim error: {error.claim} {error.error} {error.description}")
         return None
     
-    user = token.claims.get("user")
-    return user
+    claims = JWTTokenClaims.model_validate(token.claims)
+    return claims
 
 def verify_password(plain_password, hashed_password):
     '''

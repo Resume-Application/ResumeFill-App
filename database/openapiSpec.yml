@@ -74,7 +74,30 @@ paths:
   /application/{id}:
     get:
       description: 'View the application with a specific ID'
-      parameters: []
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          schema:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "app_12345"
+                  form:
+                    type: array
+                    description: List of form fields submitted with the application
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                          example: "First "
+                        value:
+                          type: string
+                          example: "John"
       responses:
         '200':
           description: OK

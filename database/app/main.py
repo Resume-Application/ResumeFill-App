@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
 from app.core.db import init_db
-from app.routers import auth
+from app.routers import auth, users
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +21,7 @@ app = FastAPI(
 
 
 app.include_router(auth.router, tags=["Authentication"])
+app.include_router(users.router, tags=["Users"])
 
 @app.get("/")
 async def root():
