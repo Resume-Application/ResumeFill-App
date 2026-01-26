@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, User } from "lucide-react";
+import { Bell, User, Puzzle } from "lucide-react"; // Puzzle icon for extension
 import Link from "next/link";
 
 export default function Navbar() {
@@ -11,7 +11,7 @@ export default function Navbar() {
         <h1 className="text-2xl font-bold tracking-tight text-black">Resume Fill</h1>
       </div>
 
-      {/* Right: Notifications + Profile */}
+      {/* Right: Notifications + Profile + Extension */}
       <div className="flex items-center gap-4">
         {/* Notification */}
         <button className="relative p-2 rounded-full hover:bg-gray-100 transition">
@@ -29,6 +29,18 @@ export default function Navbar() {
           <User className="text-gray-600" />
           <span className="text-gray-800 font-medium">Archit</span>
         </Link>
+
+        {/* Minimal White Extension Button */}
+        <a
+          href="https://your-extension-link.com" // replace with your extension link
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center p-2 rounded-full hover:bg-gray-200 transition"
+          title="Open Extension"
+        >
+          <Puzzle className="text-gray-600" />
+          <span>Extension</span>
+        </a>
       </div>
     </header>
   );
