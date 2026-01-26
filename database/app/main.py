@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
 from app.core.db import init_db
-from app.routers import auth, users
+from app.routers import auth, company, users, application
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,7 +22,8 @@ app = FastAPI(
 
 app.include_router(auth.router, tags=["Authentication"])
 app.include_router(users.router, tags=["Users"])
-
+app.include_router(application.router, tags=["Application"])
+app.include_router(company.router, tags=["Company"])
 @app.get("/")
 async def root():
     return {"message": "Welcome to FastAutofill Backend"}

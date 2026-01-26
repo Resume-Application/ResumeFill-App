@@ -1,17 +1,22 @@
 from typing import Annotated
 from fastapi import APIRouter, Request, Depends, HTTPException, status
+from sqlmodel import Session
+from app.core.db import get_session
 from app.dependencies.auth_dependencies import get_current_user
-from app.models import UserPublic
+from app.models.user_models import UserPublic
 from app.models.application_models import ApplicationResponse, CreateApplicationRequest
 from app.models.user_models import User
+import logging
 
+from app.services.application_services import create_application, get_application
 router = APIRouter()
-
-@router.middle
+logger = logging.getLogger(__name__)
+SessionDep = Annotated[Session, Depends(get_session)]
 
 @router.post("/application/create", response_model=ApplicationResponse)
-def create_application(payload: CreateApplicationRequest,
-                       current_user: Annotated[User, Depends(get_current_user)]
+def create_application_route(payload: CreateApplicationRequest,
+                       current_user: Annotated[User, Depends(get_current_user)],
+                       session: SessionDep  
     ):
     '''
     Docstring for create_application endpoint
@@ -21,26 +26,27 @@ def create_application(payload: CreateApplicationRequest,
     :return: Description
     :rtype: ApplicationResponse
     '''
-    
-    # check if a jobposition with url exists. otherwise, create it
 
-    # create the application
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
-
-    
-
+    try:
+        application = create_application(session, payload, current_user.id)
+        
+    except ValueError as e:
+        logger.error(f"Failed to create application: {e}")
+        raise HTTPException(status_code=400, detail="Failed to create application")
     
 
 @router.get("/application/{id}", response_model=ApplicationResponse)
-def get_application(id: str):
-    
-@router.delete("/application/{id}")
-def delete_application(
-    id: str,
-    _: str = Depends(s),
-):
+def get_application_route(
+    id: int, 
+    current_user: Annotated[User, Depends(get_current_user)],
+    session : SessionDep):
     
 
-@router.get("/responses/{id}")
-def get_response(id: str):
-   
+    application = get_application(session, id)
+    if application is None or application.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    

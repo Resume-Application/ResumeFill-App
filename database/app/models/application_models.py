@@ -29,6 +29,7 @@ class ApplicationForm(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     application_id: int = Field(foreign_key="application.id", index=True)
     question_id: int = Field(foreign_key="companyjobform.id", index=True)
+    form_type : str
     response: str
     created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
 
@@ -46,7 +47,7 @@ class CreateApplicationRequest(BaseModel):
     '''
     user_id: int
     jobform_url : str
-    responses: dict[str, ApplicationQuestionRequest] 
+    responses: list[ApplicationQuestionRequest] 
 
 class ApplicationQuestionResponse(BaseModel):
     '''

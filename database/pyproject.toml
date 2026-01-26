@@ -10,6 +10,7 @@ dependencies = [
     "fastapi>=0.127.0",
     "httpx>=0.28.1",
     "joserfc>=1.6.0",
+    "mkdocs>=1.6.1",
     "passlib[bcrypt]>=1.7.4",
     "pwdlib[argon2]>=0.3.0",
     "pydantic-settings>=2.12.0",
