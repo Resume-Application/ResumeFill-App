@@ -8,7 +8,6 @@ class Application(SQLModel, table=True):
     Defines an application for a user for a job.
     """
     id: int | None = Field(default=None, primary_key=True)
-
     user_id: int = Field(foreign_key="user.id", index=True)
     jobposition_id: int = Field(foreign_key="companyjobposition.id", index=True)
 
@@ -16,7 +15,6 @@ class Application(SQLModel, table=True):
         default_factory=lambda: datetime.now(timezone.utc),
         nullable=False
     )
-
     date_updated: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         nullable=False
@@ -29,11 +27,10 @@ class ApplicationForm(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     application_id: int = Field(foreign_key="application.id", index=True)
     question_id: int = Field(foreign_key="companyjobform.id", index=True)
-    form_type : str
     response: str
     created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
 
-class ApplicationQuestionRequest(BaseModel):
+class ApplicationFormRequest(BaseModel):
     '''
     Request model for constructing a question/answer in an application
     '''
@@ -46,8 +43,9 @@ class CreateApplicationRequest(BaseModel):
     Request model for creating an application
     '''
     user_id: int
-    jobform_url : str
-    responses: list[ApplicationQuestionRequest] 
+    company : str
+    job_title : str
+    responses: list[ApplicationFormRequest] 
 
 class ApplicationQuestionResponse(BaseModel):
     '''

@@ -9,11 +9,11 @@ from sqlmodel import Session, select
 from app.core import security
 from app.core.config import settings
 from app.core.db import get_session
-from app.models.company_models import CompanyJobPositionResponse, CompanyResponse, CreateCompanyJobPositionRequest, CreateCompanyRequest
+from app.models.company_models import CompanyResponse, CreateCompanyRequest
 from app.models.user_models import User, UserCreate, UserPublic
 from app.core.security import hash_password, TokenResponse, create_access_token, verify_password
-from app.routers.users import get_current_user
-from app.services.company_services import create_job_posting, find_company_with_name, create_company, find_job_position_with_id, get_company_by_id, get_company_by_id, get_company_by_name, transform_company_to_response, transform_job_position_to_response
+from app.routers.users_routes import get_current_user
+from app.services.company_services import find_company_with_name, create_company, get_company_by_id, get_company_by_id, get_company_by_name, transform_company_to_response
 import logging
 
 logger = logging.getLogger(__name__)
@@ -49,30 +49,6 @@ async def create_company_route(
         logger.error(f"Failed to create company: {ve}")
         raise HTTPException(status_code=500, detail="Failed to create company")
 
-@router.post("/company/job_posting/create", response_model=CompanyJobPositionResponse)
-async def create_job_posting_route(
-    current_user: Annotated[User, Depends(get_current_user)],
-    session: SessionDep,
-    job_posting: CreateCompanyJobPositionRequest
-):
-    '''
-    Docstring for create_job_posting_route
-    
-    :param form_data: Description
-    :type form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-    :param session: Description
-    :type session: SessionDep
-    :param job_posting: Description
-    :type job_posting: CreateCompanyJobPositionRequest
-    '''
-    logger.warning(f"Authentication for create_job_posting_route not implemented")
-    try:
-        job_position = create_job_posting(session, job_posting)
-        return transform_job_position_to_response(job_position)
-    except ValueError as ve:
-        logger.error(f"Failed to create job posting: {ve}")
-        raise HTTPException(status_code=500, detail="Failed to create job posting")
-
 
 @router.get("/company/{id}", response_model=CompanyResponse)
 async def get_company_route(
@@ -88,22 +64,4 @@ async def get_company_route(
     except ValueError as ve:
         logger.error(f"Failed to get company: {ve}")
         raise HTTPException(status_code=500, detail="Failed to get company")
-    
-    
-    
-@router.get("/company/job_posting/{id}", response_model=CompanyJobPositionResponse)
-async def get_job_posting_route(
-    id: int,
-    session : SessionDep,
-    current_user: Annotated[User, Depends(get_current_user)],
-):
-    try:
-        job_posting = find_job_position_with_id(session, id)
-        if job_posting is None:
-            raise HTTPException(status_code=404, detail="Job posting not found")
-        jobPostingResponse = transform_job_position_to_response(job_posting)
-        return jobPostingResponse
-    except ValueError as ve:
-        logger.error(f"Failed to get job posting: {ve}")
-        raise HTTPException(status_code=500, detail="Failed to get job posting")
     

@@ -25,14 +25,11 @@ def populated_session_fixture(session: Session):
         password="securepassword",
         username="JoesAccount"
     )
-
     user = create_user(session=session, user_create=user_in)
-
     create_company = CreateCompanyRequest(
         name="Test Company",
         description="A test company for testing purposes"
     )
-
     company = create_company(session, create_company)
 
     company_jobposition_request = CreateCompanyJobPositionRequest(

@@ -5,8 +5,7 @@ from app.core.db import get_session
 from sqlmodel.pool import StaticPool  
 import pytest
 
-from app.models.company_models import CompanyJobPositionResponse, CompanyResponse
-
+from app.models.company_models import CompanyResponse
 @pytest.fixture(name="session")  
 def session_fixture():  
     engine = create_engine(
@@ -64,35 +63,6 @@ def test_create_company(client: TestClient, auth_headers):
                            headers=auth_headers)
     assert response.status_code == 200
     
-def test_create_job_posting(client: TestClient, auth_headers):
-    payload = {
-        "name": "Test Company",
-        "description": "A company for testing"
-    }
-
-    response = client.post("/company/create", 
-                           json=payload,
-                           headers=auth_headers)
-    
-    assert response.status_code == 200
-    companyResp = CompanyResponse.model_validate(response.json())
-    payload = {
-        "title": "Software Engineer",
-        "company": "Test Company",
-        "location": "San Francisco, CA",
-        "work_type": "onsite",
-        "url": "https://example.com/apply",
-        "role_description": "full time",
-        "low_pay_range": 80000,
-        "high_pay_range": 120000,
-        "form_questions": ["What is your experience?", "Why do you want this job?"],
-    }
-    
-
-    response = client.post("/company/job_posting/create", 
-                           json=payload,
-                           headers=auth_headers)
-    assert response.status_code == 200
 def test_get_company(client: TestClient, auth_headers):
     payload = {
         "name": "Test Company",
@@ -112,43 +82,6 @@ def test_get_company(client: TestClient, auth_headers):
     assert data.id == companyResp.id
     assert data.name == "Test Company"
 
-def test_get_job_posting(client: TestClient, auth_headers):
-    payload = {
-        "name": "Test Company",
-        "description": "A company for testing"
-    }
-
-    createResponse = client.post("/company/create", json=payload, headers=auth_headers)
-    assert createResponse.status_code == 200
-    companyResp = CompanyResponse.model_validate(createResponse.json())
-    payload = {
-        "title": "Software Engineer",
-        "company": "Test Company",
-        "location": "San Francisco, CA",
-        "work_type": "onsite",
-        "url": "https://example.com/apply",
-        "role_description": "full time",
-        "low_pay_range": 80000,
-        "high_pay_range": 120000,
-        "form_questions": ["What is your experience?", "Why do you want this job?"],
-    }
-    response = client.post("/company/job_posting/create", 
-                           json=payload,
-                           headers=auth_headers)
-    jobResp = CompanyJobPositionResponse.model_validate(response.json())
-
-    getResponse = client.get(f"/company/job_posting/{jobResp.id}",
-                             headers=auth_headers)
-    assert getResponse.status_code == 200
-    data = CompanyJobPositionResponse.model_validate(getResponse.json())
-    assert data.title == "Software Engineer"
-
-
 def test_get_company_not_exist(client: TestClient):
     getResponse = client.get(f"/company/500")
-    assert getResponse.status_code == 404
-
-
-def test_get_job_posting_not_exist(client: TestClient, auth_headers):
-    getResponse = client.get(f"/company/job_posting/500", headers=auth_headers)
     assert getResponse.status_code == 404

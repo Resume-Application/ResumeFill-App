@@ -1,17 +1,22 @@
 from pydantic import ValidationError
 from requests import Session
 from app.core.db import get_session
-from app.models.application_models import Application, ApplicationForm, ApplicationQuestionResponse, ApplicationResponse, ApplicationQuestionRequest, CreateApplicationRequest
+from app.models.application_models import Application, ApplicationForm, ApplicationFormRequest, ApplicationQuestionResponse, ApplicationResponse, CreateApplicationRequest
 from app.dependencies.auth_dependencies import get_current_user
+from app.models.job_position_models import CompanyJobForm
 from app.models.user_models import User
 from typing import Annotated
 from fastapi import Depends
 
-from app.services.company_services import find_job_posting_with_url
+from app.services.company_services import find_company_with_name
 from app.services.user_services import find_user_with_id
 SessionDep = Annotated[Session, Depends(get_session)]
 
-def create_applicationForm(session: SessionDep, application : Application, questionReq : ApplicationQuestionRequest, updateSession = True) -> ApplicationForm:
+def create_applicationForm(session: SessionDep, 
+                           application : Application,
+                           companyJobForm : CompanyJobForm, 
+                           questionReq : ApplicationFormRequest, 
+                           updateSession = True) -> ApplicationForm:
     '''
     Creates a response to a question in an application.
     
@@ -26,7 +31,7 @@ def create_applicationForm(session: SessionDep, application : Application, quest
     applicationForm = ApplicationForm(
         user_id = application.user_id,
         application_id = application.id,
-        
+        question_id = companyJobForm.id,
         response = questionReq.form_response
     )
 
@@ -60,8 +65,10 @@ def create_application(session: SessionDep,
         raise ValueError("The user with this id does not exist in the system")
     # assert job with url exists exists
 
-    job_position = find_job_posting_with_url(session, request.jobform_url)
-
+    company = find_company_with_name(session, request.company)
+    if not company:
+        raise ValueError("The company with this name does not exist in the system")
+    job_position = get_jobform_by_company_and_title(session, company, request.job_title)
     if not job_position:
         raise ValueError("The job position with this url does not exist in the system")
     
@@ -75,11 +82,12 @@ def create_application(session: SessionDep,
 
     for questionReq in request.responses:
         try:
-            questionReq = ApplicationQuestionRequest.model_validate(questionReq)
+            questionReq = ApplicationFormRequest.model_validate(questionReq)
         except ValidationError as e:
-            # item is NOT a valid ApplicationQuestionRequest
+            # item is NOT a valid ApplicationFormRequest
             raise ValueError(f"Invalid question/answer data: {e}")
         
+
         applicationForm = create_applicationForm(session, application, questionReq, updateSession=False)
         session.add(applicationForm)
 
