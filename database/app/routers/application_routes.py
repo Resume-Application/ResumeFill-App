@@ -8,7 +8,7 @@ from app.models.application_models import ApplicationResponse, CreateApplication
 from app.models.user_models import User
 import logging
 
-from app.services.application_services import create_application, get_application
+from app.services.application_services import create_application, get_application, transform_application_to_response
 router = APIRouter()
 logger = logging.getLogger(__name__)
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -32,7 +32,8 @@ def create_application_route(payload: CreateApplicationRequest,
 
     try:
         application = create_application(session, payload, current_user.id)
-        
+
+        return transform_application_to_response(session, application)
     except ValueError as e:
         logger.error(f"Failed to create application: {e}")
         raise HTTPException(status_code=400, detail="Failed to create application")
@@ -43,10 +44,15 @@ def get_application_route(
     id: int, 
     current_user: Annotated[User, Depends(get_current_user)],
     session : SessionDep):
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     
 
     application = get_application(session, id)
-    if application is None or application.user_id != current_user.id:
+    
+    if application is None:
         raise HTTPException(status_code=404, detail="Application not found")
-
+    if application.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return transform_application_to_response(session,application)
     

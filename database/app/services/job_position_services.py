@@ -9,26 +9,13 @@ from app.services.company_services import get_company_by_name
 logger = logging.getLogger(__name__)
 SessionDep = Annotated[Session, Depends(get_session)]
 
-def get_jobform_by_company_and_title(session : SessionDep, company : Company, title : str) -> CompanyJobPosition | None:
+def get_jobposition_by_company_and_title(session : SessionDep, company : Company, title : str) -> CompanyJobPosition | None:
     return session.exec(
         select(CompanyJobPosition).where(
             CompanyJobPosition.title == title,
             CompanyJobPosition.company_id == company.id
         )
     ).first()
-
-def find_job_position_with_url(session : SessionDep, url : str) -> CompanyJobPosition | None:
-    '''
-    Finds a job posting with a specific url.
-    
-    :param session: Description
-    :type session: SessionDep
-    :param url: Description
-    :type url: str
-    :return: Description
-    :rtype: CompanyJobPosition | None
-    '''
-    return session.exec(select(CompanyJobPosition).where(CompanyJobPosition.url == url)).first() 
 
 def find_job_position_with_id(session : SessionDep, id : int) -> CompanyJobPosition | None:
     '''
@@ -43,6 +30,21 @@ def find_job_position_with_id(session : SessionDep, id : int) -> CompanyJobPosit
     '''
     return session.exec(select(CompanyJobPosition).where(CompanyJobPosition.id == id)).first()
 
+def find_jobform_with_id(session : SessionDep, id : int) -> CompanyJobForm | None:
+    '''
+    Finds a job form with a specific id.
+    
+    :param session: Description
+    :type session: SessionDep
+    :param id: Description
+    :type id: int
+    :return: Description
+    :rtype: CompanyJobPosition | None
+    '''
+    return session.exec(select(CompanyJobForm).where(CompanyJobForm.id == id)).first()
+
+
+
 def create_job_position(session : SessionDep, job_position : CreateCompanyJobPositionRequest) -> CompanyJobPosition | None:
     '''
     Creates a new job posting for a company. Raises an error if a job posting with the url exists.
@@ -56,11 +58,7 @@ def create_job_position(session : SessionDep, job_position : CreateCompanyJobPos
     if not isinstance(job_position, CreateCompanyJobPositionRequest):
         logger.error(f"Invalid job posting data: {job_position}")
         raise ValueError("Invalid job posting data provided")
-
-    existing_job = find_job_position_with_url(session, job_position.url)
-    if existing_job:
-        logger.error(f"Attempted to create job posting with existing url: {job_position.url}")
-        raise ValueError("The job posting with this url already exists in the system")
+    
     company = get_company_by_name(session, job_position.company)
     if company is None:
         logger.error(f"Company not found for job posting: {job_position.company}")

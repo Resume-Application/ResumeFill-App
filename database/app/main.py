@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
 from app.core.db import init_db
-from app.routers import auth_routes, company_routes, job_position_routes, users_routes
+from app.routers import auth_routes, company_routes, job_position_routes, users_routes, application_routes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,7 +22,7 @@ app = FastAPI(
 
 app.include_router(auth_routes.router, tags=["Authentication"])
 app.include_router(users_routes.router, tags=["Users"])
-#app.include_router(application_routes.router, tags=["Application"])
+app.include_router(application_routes.router, tags=["Application"])
 app.include_router(company_routes.router, tags=["Company"])
 app.include_router(job_position_routes.router, tags=["Job Positions"])
 @app.get("/")

@@ -1,14 +1,15 @@
 from pydantic import ValidationError
 from requests import Session
 from app.core.db import get_session
-from app.models.application_models import Application, ApplicationForm, ApplicationFormRequest, ApplicationQuestionResponse, ApplicationResponse, CreateApplicationRequest
+from app.models.application_models import Application, ApplicationForm, ApplicationFormRequest, ApplicationFormResponse, ApplicationResponse, CreateApplicationRequest
 from app.dependencies.auth_dependencies import get_current_user
 from app.models.job_position_models import CompanyJobForm
 from app.models.user_models import User
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import Depends
 
 from app.services.company_services import find_company_with_name
+from app.services.job_position_services import find_jobform_with_id, get_jobposition_by_company_and_title
 from app.services.user_services import find_user_with_id
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -68,17 +69,19 @@ def create_application(session: SessionDep,
     company = find_company_with_name(session, request.company)
     if not company:
         raise ValueError("The company with this name does not exist in the system")
-    job_position = get_jobform_by_company_and_title(session, company, request.job_title)
+    job_position = get_jobposition_by_company_and_title(session, company, request.title)
     if not job_position:
         raise ValueError("The job position with this url does not exist in the system")
     
 
     application = Application(
-        user_id = request.user_id,
+        user_id = user_id,
         jobposition_id = job_position.id
     )
     session.add(application)
     session.flush()
+
+    jobforms = session.query(CompanyJobForm).filter(CompanyJobForm.jobposition_id == job_position.id).all()
 
     for questionReq in request.responses:
         try:
@@ -86,11 +89,21 @@ def create_application(session: SessionDep,
         except ValidationError as e:
             # item is NOT a valid ApplicationFormRequest
             raise ValueError(f"Invalid question/answer data: {e}")
-        
-
-        applicationForm = create_applicationForm(session, application, questionReq, updateSession=False)
-        session.add(applicationForm)
-
+        added = False
+        for jobform in jobforms:
+            if jobform.question == questionReq.form_question:
+                applicationForm = create_applicationForm(
+                    session,
+                    application,
+                    jobform,
+                    questionReq,
+                    updateSession=False
+                )
+                session.add(applicationForm)
+                added = True
+                break
+        if not added:
+            raise ValueError(f"Question not found in job forms: {questionReq.form_question}")
     session.commit()
 
     return application
@@ -125,18 +138,19 @@ def transform_application_to_response(session: SessionDep, application: Applicat
             f"application must be Application, got {type(application).__name__}"
         )
 
-    applicationForms = session.query(ApplicationForm).filter(ApplicationForm.application_id == application.id).all()
+    applicationForms : List[ApplicationForm] = session.query(ApplicationForm).filter(ApplicationForm.application_id == application.id).all()
     responses = []
     for form in applicationForms:
-        question_response = ApplicationQuestionResponse(
-            form_question = form.question_id,
+        formQuestion = find_jobform_with_id(session, form.question_id)
+
+        question_response = ApplicationFormResponse(
+            form_question = formQuestion.question,
             form_response = form.response,
-            form_type = form.form_type
         )
         responses.append(question_response)
 
     applicationResponse = ApplicationResponse(
-        user_id = application.user_id,
+        application_id = application.id,
         jobposition_id = application.jobposition_id,
         responses = responses
     )

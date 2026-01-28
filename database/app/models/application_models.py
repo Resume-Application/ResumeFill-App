@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel
 from sqlmodel import Field, SQLModel
 from datetime import datetime, timezone
@@ -28,7 +29,9 @@ class ApplicationForm(SQLModel, table=True):
     application_id: int = Field(foreign_key="application.id", index=True)
     question_id: int = Field(foreign_key="companyjobform.id", index=True)
     response: str
-    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
 
 class ApplicationFormRequest(BaseModel):
     '''
@@ -36,29 +39,26 @@ class ApplicationFormRequest(BaseModel):
     '''
     form_question : str
     form_response : str
-    form_type : str
 
 class CreateApplicationRequest(BaseModel):
     '''
     Request model for creating an application
     '''
-    user_id: int
     company : str
-    job_title : str
+    title : str
     responses: list[ApplicationFormRequest] 
 
-class ApplicationQuestionResponse(BaseModel):
+class ApplicationFormResponse(BaseModel):
     '''
     Response model for returning a question/answer in an application
     '''
     form_question : str
     form_response : str
-    form_type : str
 
 class ApplicationResponse(BaseModel):
     '''
     Response model for returning an a complete application
     '''
-    user_id: int
+    application_id: int
     jobposition_id: int
-    responses: dict[str, ApplicationQuestionResponse] 
+    responses: List[ApplicationFormResponse] 
