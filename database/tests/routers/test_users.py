@@ -61,3 +61,33 @@ def test_read_users_me(client: TestClient):
 def test_read_users_me_unauthorized(client: TestClient):
     response = client.get("/user/profile")
     assert response.status_code == 401
+
+def test_get_user_summary(client: TestClient):
+    # Create a user
+    register_response = client.post(
+        "/auth/register",
+        json={
+            "username": "Deadpool",
+            "full_name": "Dive Wilson",
+            "password": "DeadpoolsPassword",
+            "email": "deadpool@gmail.com"
+        }
+    )
+    assert register_response.status_code == 200
+
+    # Login with correct credentials
+    login_response = client.post(
+        "/auth/login",
+        data={
+            "username": "Deadpool",
+            "password": "DeadpoolsPassword"
+        }
+    )
+
+    assert login_response.status_code == 200
+    token = login_response.json()["access_token"]
+    response = client.get("/user/summary", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert response.json()["username"] == "Deadpool"
+    assert response.json()["profile_url"] == "to_be_implemented"
+    assert response.json()["applications_count"] == 0

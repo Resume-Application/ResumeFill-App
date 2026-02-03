@@ -156,3 +156,17 @@ def transform_application_to_response(session: SessionDep, application: Applicat
     )
 
     return applicationResponse
+
+def count_user_applications(session: SessionDep, user_id: int) -> int:
+    '''
+    Counts the number of applications submitted by a user.
+    
+    :param session: Database session
+    :type session: SessionDep
+    :param user_id: ID of the user
+    :type user_id: int
+    :return: Number of applications submitted by the user
+    :rtype: int
+    '''
+    application_count = session.query(Application).filter(Application.user_id == user_id).count()
+    return application_count
